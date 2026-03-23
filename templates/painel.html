@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Painel</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f5;
+            color: #444;
+        }
+
+        .topo {
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .topo img {
+            height: 40px;
+        }
+
+        .versao {
+            margin-left: 15px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .acoes {
+            margin-left: auto;
+        }
+
+        .barra-topo {
+            height: 1.5px;
+            width: 100%;
+            background: linear-gradient(90deg, #830505, #c10d0d);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #b3b3b3;
+            color: white;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #830505;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        input,
+        select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            min-width: 160px;
+            /* 🔥 FIX TAMANHO */
+            height: 40px;
+            /* 🔥 altura fixa */
+            box-sizing: border-box;
+        }
+
+        .linha-filtros {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px;
+            align-items: end;
+        }
+
+        .selecoes {
+            margin-top: 25px;
+        }
+
+        .lista-selecao {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: #eef2f1;
+            padding: 6px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .tag span {
+            cursor: pointer;
+            font-weight: bold;
+            color: #888;
+        }
+
+        .tag span:hover {
+            color: red;
+        }
+
+        .botao {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 20px;
+        }
+
+        .grupo {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        label {
+            font-size: 12px;
+            margin-bottom: 3px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topo">
+        <img src="/static/images/logo_star.png">
+        <div class="versao">V1.0</div>
+
+        <div class="acoes">
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="barra-topo"></div>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h2>Consulta de Comissões</h2>
+
+            <form method="post" action="/consultar" id="formConsulta">
+
+                <div class="linha-filtros">
+
+                    <div class="grupo">
+                        <label>Data início</label>
+                        <input type="date" name="data_inicio" value="{{ data_inicio }}">
+                    </div>
+
+                    <div class="grupo">
+                        <label>Data fim</label>
+                        <input type="date" name="data_fim" value="{{ data_fim }}">
+                    </div>
+
+                    <div class="grupo">
+                        <label>Cargo</label>
+                        <select name="cargo" id="selectCargo">
+                            <option value="vendedor" {% if cargo=="vendedor" %}selected{% endif %}>Vendedor</option>
+                            <option value="gerente" {% if cargo=="gerente" %}selected{% endif %}>Gerente</option>
+                        </select>
+                    </div>
+
+                    <div class="grupo">
+                        <label>Loja</label>
+                        <select id="selectLoja">
+                            <option value="">Selecionar</option>
+                            {% for loja in lojas %}
+                            <option value="{{ loja.bankno }}">Loja {{ loja.bankno }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="grupo">
+                        <label>Funcionário</label>
+                        <select id="selectVendedor" disabled>
+                            <option value="">Selecionar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="botao">
+                    <button type="submit">Consultar</button>
+                    <button type="button" onclick="limparFiltros()">Limpar Filtros</button>
+                </div>
+
+                <input type="hidden" name="lojas" id="inputLojas">
+                <input type="hidden" name="vendedores" id="inputVendedores">
+
+            </form>
+
+            <div class="selecoes">
+                <div id="lojasSelecionadas" class="lista-selecao"></div>
+                <div id="vendedoresSelecionados" class="lista-selecao"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+
+        let lojasSelecionadas = []
+        let vendedoresSelecionados = []
+
+        const lojasBackend = "{{ lojas_selecionadas or '' }}"
+        const vendedoresBackend = "{{ vendedores_selecionados or '' }}"
+
+        function atualizarInputs() {
+            document.getElementById("inputLojas").value = lojasSelecionadas.map(l => l.id).join(",")
+            document.getElementById("inputVendedores").value = vendedoresSelecionados.map(v => v.id).join(",")
+        }
+
+        function atualizarVendedores() {
+            const select = document.getElementById("selectVendedor")
+            const cargo = document.getElementById("selectCargo").value
+            const lojasIds = lojasSelecionadas.map(l => l.id).join(",")
+
+            if (!lojasIds) {
+                select.innerHTML = `<option value="">Selecionar</option>`
+                select.disabled = true
+                vendedoresSelecionados = []
+                renderVendedores()
+                return Promise.resolve([])
+            }
+
+            return fetch(`/vendedores?storeno=${lojasIds}&cargo=${cargo}`)
+                .then(r => r.json())
+                .then(lista => {
+
+                    select.innerHTML = `<option value="">Selecionar</option>`
+
+                    lista.forEach(v => {
+                        const opt = document.createElement("option")
+                        opt.value = v.no
+                        opt.textContent = v.name
+                        select.appendChild(opt)
+                    })
+
+                    select.disabled = false
+
+                    vendedoresSelecionados = vendedoresSelecionados.filter(v =>
+                        lista.find(novo => novo.no == v.id)
+                    )
+
+                    renderVendedores()
+
+                    return lista
+                })
+        }
+
+        function renderLojas() {
+            const container = document.getElementById("lojasSelecionadas")
+            container.innerHTML = ""
+
+            lojasSelecionadas.forEach((loja, index) => {
+                const tag = document.createElement("div")
+                tag.className = "tag"
+                tag.innerHTML = `Loja ${loja.id} <span onclick="removerLoja(${index})">✕</span>`
+                container.appendChild(tag)
+            })
+
+            atualizarInputs()
+        }
+
+        function renderVendedores() {
+            const container = document.getElementById("vendedoresSelecionados")
+            container.innerHTML = ""
+
+            vendedoresSelecionados.forEach((v, index) => {
+                const tag = document.createElement("div")
+                tag.className = "tag"
+                tag.innerHTML = `${v.nome} <span onclick="removerVendedor(${index})">✕</span>`
+                container.appendChild(tag)
+            })
+
+            atualizarInputs()
+        }
+
+        function removerLoja(index) {
+            lojasSelecionadas.splice(index, 1)
+            renderLojas()
+            atualizarVendedores()
+        }
+
+        function removerVendedor(index) {
+            vendedoresSelecionados.splice(index, 1)
+            renderVendedores()
+        }
+
+        document.getElementById("selectLoja").addEventListener("change", function () {
+            const id = this.value
+            if (!id) return
+
+            if (!lojasSelecionadas.find(l => l.id == id)) {
+                lojasSelecionadas.push({ id })
+                renderLojas()
+            }
+
+            this.value = ""
+            atualizarVendedores()
+        })
+
+        document.getElementById("selectVendedor").addEventListener("change", function () {
+            const id = this.value
+            const nome = this.options[this.selectedIndex].text
+
+            if (!id) return
+
+            if (!vendedoresSelecionados.find(v => v.id == id)) {
+                vendedoresSelecionados.push({ id, nome })
+                renderVendedores()
+            }
+
+            this.value = ""
+        })
+
+        function logout() {
+            window.location.href = "/logout"
+        }
+
+        document.getElementById("selectCargo").addEventListener("change", function () {
+            vendedoresSelecionados = []
+            renderVendedores()
+            atualizarVendedores()
+        })
+
+        function limparFiltros() {
+            // datas
+            document.querySelector('input[name="data_inicio"]').value = ""
+            document.querySelector('input[name="data_fim"]').value = ""
+
+            // selects
+            document.getElementById("selectCargo").value = "vendedor"
+            document.getElementById("selectLoja").value = ""
+            document.getElementById("selectVendedor").innerHTML = `<option value="">Selecionar</option>`
+            document.getElementById("selectVendedor").disabled = true
+
+            // arrays
+            lojasSelecionadas = []
+            vendedoresSelecionados = []
+
+            // render
+            renderLojas()
+            renderVendedores()
+
+            atualizarInputs()
+        }
+
+        // 🔥 restaurar lojas
+        if (lojasBackend) {
+            lojasSelecionadas = lojasBackend.split(",").map(id => ({ id }))
+            renderLojas()
+        }
+
+        // 🔥 restaurar vendedores corretamente (após carregar lista)
+        atualizarVendedores().then((lista) => {
+
+            if (vendedoresBackend && vendedoresBackend !== "None") {
+
+                const ids = vendedoresBackend.split(",")
+
+                vendedoresSelecionados = ids.map(id => {
+                    const vendedor = lista.find(v => v.no == id)
+
+                    return {
+                        id,
+                        nome: vendedor ? vendedor.name : id
+                    }
+                })
+
+                renderVendedores()
+            }
+
+        })    
+    </script>
+</body>
+
+</html>

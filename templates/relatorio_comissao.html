@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+            margin: 20px 30px;
+        }
+
+        .titulo {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .dados {
+            margin-bottom: 10px;
+        }
+
+        .secao {
+            margin-top: 5px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid black;
+            margin: 5px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 3px;
+            text-align: left;
+        }
+
+        .resumo {
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        .assinatura {
+            display: flex;
+            justify-content: center;
+        }
+
+        .nome_assinatura {
+            text-align: center;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <table width="100%">
+        <tr>
+
+            <td style="border: none;">
+                <img src="/static/images/logo_star.png" width="140">
+            </td>
+
+            <td style="border: none; width:34%; text-align:center; font-size:18px; font-weight:bold;">
+                RELATÓRIO DE COMISSÃO
+            </td>
+
+            <td style="border: none; width:33%;"></td>
+
+        </tr>
+    </table>
+
+    <br>
+
+    <div class="dados">
+
+        <b>Cargo:</b> {{ cargo }}<br>
+        <b>Nome:</b> {{ nome }}<br>
+        <b>Data de Referência:</b> {{ mes }}
+
+    </div>
+
+    <div class="secao">
+
+        <b>Objetivo</b><br>
+
+        A política de comissão tem como objetivo incentivar o desempenho comercial,
+        promover a rentabilidade das vendas e estimular a qualidade no atendimento
+        ao cliente. A remuneração variável está vinculada aos resultados obtidos nas
+        vendas realizadas, considerando margens, grupos de produtos e políticas
+        comerciais da empresa.
+
+    </div>
+
+    <hr>
+
+    <div class="secao">
+
+        <b>Política de Metas</b><br>
+
+        A comissão é calculada de acordo com o grupo de produtos e a margem obtida
+        nas vendas realizadas, conforme política comercial vigente.
+
+    </div>
+
+    <!-- SEM LINHA AQUI -->
+
+    <table>
+
+        <tr>
+            <th>Grupo</th>
+            <th>Descrição</th>
+            <th>Comissão</th>
+        </tr>
+
+        <tr>
+            <td>M</td>
+            <td>Móveis</td>
+            <td>
+                {% if tipo == "gerente" %}
+                Até 1,6% conforme margem e loja
+                {% else %}
+                Até 3,8% conforme margem e função
+                {% endif %}
+            </td>
+        </tr>
+
+        {% if tipo != "gerente" %}
+        <tr>
+            <td>E</td>
+            <td>Eletrodomésticos</td>
+            <td>1,0%</td>
+        </tr>
+
+        <tr>
+            <td>C</td>
+            <td>Celulares</td>
+            <td>1,0%</td>
+        </tr>
+        {% endif %}
+
+        <tr>
+            <td>S</td>
+            <td>Saldo</td>
+            <td>
+                {% if tipo == "gerente" %}
+                Saldo (loja 31) 0,7% até 0,9% conforme valor total de vendas
+                {% else %}
+                1,8% ou 2,0% (Feirão loja 31)
+                {% endif %}
+            </td>
+        </tr>
+
+        <tr>
+            <td>P</td>
+            <td>
+                {% if tipo == "gerente" %}
+                Promoção (Eletro + Celular + Promo)
+                {% else %}
+                Promocional
+                {% endif %}
+            </td>
+            <td>
+                {% if tipo == "gerente" %}
+                0,5%
+                {% else %}
+                1,8%
+                {% endif %}
+            </td>
+        </tr>
+
+    </table>
+
+    <hr>
+
+    <div class="secao">
+
+        <b>Resumo Valor Pago</b>
+
+        <table class="resumo">
+
+            <tr>
+                <th>Tipo de Comissão</th>
+                <th style="text-align:right;">Valor</th>
+                <th style="text-align:right;">Comissão</th>
+            </tr>
+
+            <tr>
+                <td>COMISSÃO MÓVEIS</td>
+                <td style="text-align:right;">R$ {{ valor_m }}</td>
+                <td style="text-align:right;">R$ {{ comissao_m }}</td>
+            </tr>
+
+            {% if tipo != "gerente" %}
+            <tr>
+                <td>COMISSÃO ELETRO</td>
+                <td style="text-align:right;">R$ {{ valor_e }}</td>
+                <td style="text-align:right;">R$ {{ comissao_e }}</td>
+            </tr>
+
+            <tr>
+                <td>COMISSÃO CELULAR</td>
+                <td style="text-align:right;">R$ {{ valor_c }}</td>
+                <td style="text-align:right;">R$ {{ comissao_c }}</td>
+            </tr>
+            {% endif %}
+
+            <tr>
+                <td>COMISSÃO SALDO</td>
+                <td style="text-align:right;">R$ {{ valor_s }}</td>
+                <td style="text-align:right;">R$ {{ comissao_s }}</td>
+            </tr>
+
+            <tr>
+                <td>
+                    {% if tipo == "gerente" %}
+                    COMISSÃO PROMOCIONAL (E+C+P)
+                    {% else %}
+                    COMISSÃO PROMOCIONAL
+                    {% endif %}
+                </td>
+                <td style="text-align:right;">R$ {{ valor_p }}</td>
+                <td style="text-align:right;">R$ {{ comissao_p }}</td>
+            </tr>
+
+            <tr>
+                <td><b>TOTAL</b></td>
+                <td style="text-align:right;"><b>R$ {{ valor_total }}</b></td>
+                <td style="text-align:right;"><b>R$ {{ total_comissao }}</b></td>
+            </tr>
+
+        </table>
+
+    </div>
+
+    <hr>
+
+    <br><br><br>
+
+    <div style="margin-top:30px; width:100%;">
+
+        <div style="text-align:center;">
+            _______________________________________<br>
+            {{ nome }}
+        </div>
+
+        <div style="text-align:right; margin-top:10px;">
+            ____ / ____ / ______
+        </div>
+
+    </div>
+
+</body>
+
+</html>

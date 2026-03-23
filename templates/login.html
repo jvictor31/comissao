@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Comissões</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            background: linear-gradient(135deg, #ffffff 40%, #830505 40%);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header img {
+            height: 45px;
+        }
+
+        .versao {
+            margin-left: 15px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .container {
+            height: calc(100vh - 80px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .login-card {
+            background: #fff;
+            width: 400px;
+            padding: 45px 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .titulo {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .subtitulo {
+            font-size: 26px;
+            font-weight: bold;
+            color: #222;
+            margin-bottom: 30px;
+        }
+
+        .grupo {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: #830505;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(131, 5, 5, 0.15);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #830505;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #5f0303;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .mensagem {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #d93025;
+            background: #ffeaea;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 15px;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <img src="/static/images/logo_star.png">
+        <div class="versao">V1.0</div>
+    </div>
+
+    <div class="container">
+
+        <div class="login-card">
+
+            <div class="titulo">Sistema de Comissões</div>
+            <div class="subtitulo">Acesso ao Sistema</div>
+
+            <form method="post" action="/login">
+
+                <div class="grupo">
+                    <label>Usuário</label>
+                    <input name="login" required autofocus>
+                </div>
+
+                <div class="grupo">
+                    <label>Senha</label>
+                    <input name="senha" type="password" required>
+                </div>
+
+                <button type="submit">Entrar</button>
+
+            </form>
+
+            {% if erro %}
+                <div class="mensagem">{{ erro }}</div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <div class="footer">
+        © Sistema de Comissões • Uso interno
+    </div>
+
+</body>
+</html>

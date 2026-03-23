@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Comissões</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f5;
+            color: #444;
+        }
+
+        .topo {
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .topo img {
+            height: 40px;
+        }
+
+        .versao {
+            margin-left: 15px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .barra-topo {
+            height: 1.5px;
+            width: 100%;
+            background: linear-gradient(90deg, #830505, #c10d0d);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .acoes {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #b3b3b3;
+            color: white;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #830505;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+        }
+
+        .header-info {
+            margin-bottom: 20px;
+        }
+
+        .header-info h3 {
+            margin: 0;
+        }
+
+        .header-info span {
+            color: #777;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f1f3f5;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            /* 🔥 tudo alinhado */
+        }
+
+        td.nome {
+            text-align: left;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .subtotal {
+            background: #eef2f7;
+            font-weight: bold;
+        }
+
+        .totais {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 2px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 40px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topo">
+        <img src="/static/images/logo_star.png">
+        <div class="versao">V1.0</div>
+
+        <div class="acoes">
+            <button onclick="voltar()">Nova Consulta</button>
+            <button onclick="csv()">Exportar CSV</button>
+            <button onclick="pdf()">Gerar PDF</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="barra-topo"></div>
+
+    <div class="container">
+
+        <div class="card">
+
+            <div class="header-info">
+                <h3>Relatório de Comissões</h3>
+                <span>Período: {{ data_inicio_br }} até {{ data_fim_br }}</span><br>
+                <span>Cargo: {{ cargo|capitalize }}</span>
+            </div>
+
+            <table>
+
+                <tr>
+                    <th>Loja</th>
+                    <th>Cód.</th>
+                    <th>Vendedor</th>
+                    <th>Grupo</th>
+                    <th>Valor</th>
+                    <th>Margem</th>
+                    <th>%</th>
+                    <th>Comissão</th>
+                </tr>
+
+                {% if dados %}
+
+                {% for linha in dados %}
+
+                {% if not loop.first and loop.previtem.vendno != linha.vendno %}
+                <tr class="subtotal">
+                    <td colspan="4">
+                        Subtotal {{ totais_vendedor[loop.previtem.vendno].nome }}
+                    </td>
+
+                    <td>
+                        {{ totais_vendedor[loop.previtem.vendno].vendas_formatado }}
+                    </td>
+
+                    <td></td>
+                    <td></td>
+
+                    <td>
+                        {{ totais_vendedor[loop.previtem.vendno].comissao_formatado }}
+                    </td>
+                </tr>
+                {% endif %}
+
+                <tr>
+                    <td>{{ linha.storeno }}</td>
+                    <td>{{ linha.vendno }}</td>
+                    <td class="nome">{{ linha.vendedor }}</td>
+                    <td>{{ linha.grupo if linha.grupo else '-' }}</td>
+
+                    <td>{{ linha.valor_formatado }}</td>
+
+                    <td>
+                        {% if linha.margem is not none %}
+                        {{ linha.margem }}%
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+
+                    <td>{{ linha.percentual_comissao }}%</td>
+
+                    <td>{{ linha.comissao_formatada }}</td>
+                </tr>
+
+                {% endfor %}
+
+                <tr class="subtotal">
+                    <td colspan="4">
+                        Subtotal {{ totais_vendedor[dados[-1].vendno].nome }}
+                    </td>
+
+                    <td>
+                        {{ totais_vendedor[dados[-1].vendno].vendas_formatado }}
+                    </td>
+
+                    <td></td>
+                    <td></td>
+
+                    <td>
+                        {{ totais_vendedor[dados[-1].vendno].comissao_formatado }}
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="8">Nenhum resultado encontrado</td>
+                </tr>
+                {% endif %}
+
+            </table>
+
+            <div class="totais">
+                <div>
+                    Total de Vendas: {{ total_vendas_formatado }}
+                </div>
+
+                <div>
+                    Total de Comissões: {{ total_comissoes_formatado }}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function voltar() {
+            const params = new URLSearchParams({
+                data_inicio: "{{ data_inicio }}",
+                data_fim: "{{ data_fim }}",
+                lojas: "{{ lojas }}",
+                vendedores: "{{ vendedores }}",
+                cargo: "{{ cargo }}"
+            })
+
+            window.location.href = "/painel?" + params.toString()
+        }
+        
+        function logout() { window.location.href = "/logout"; }
+
+        function csv() {
+            window.open(`/exportar_csv?data_inicio={{ data_inicio }}&data_fim={{ data_fim }}&lojas={{ lojas }}&vendedores={{ vendedores }}&cargo={{ cargo }}`)
+        }
+
+        function pdf() {
+            window.open(`/exportar_pdf?data_inicio={{ data_inicio }}&data_fim={{ data_fim }}&lojas={{ lojas }}&vendedores={{ vendedores }}&cargo={{ cargo }}`)
+        }
+    </script>
+
+</body>
+
+</html>
